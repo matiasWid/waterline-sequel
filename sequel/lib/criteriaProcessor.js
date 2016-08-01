@@ -881,8 +881,14 @@ CriteriaProcessor.prototype.sort = function(options) {
   this.queryString += ' ORDER BY ';
 
   _.each(keys, function(key) {
-    var direction = options[key] === 1 ? 'ASC' : 'DESC';
-    self.queryString += utils.escapeName(self.currentTable, self.escapeCharacter, self.schemaName) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
+    var hasTableName = key.split('.');
+    if(Array.isArray(hasTableName)){
+      var direction = options[key] === 1 ? 'ASC' : 'DESC';
+      self.queryString += utils.escapeName(hasTableName[0], self.escapeCharacter, hasTableName[1]) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
+    }else{
+      var direction = options[key] === 1 ? 'ASC' : 'DESC';
+      self.queryString += utils.escapeName(self.schemaName, self.escapeCharacter, self.tableName) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
+    }
   });
 
   // Remove trailing comma
