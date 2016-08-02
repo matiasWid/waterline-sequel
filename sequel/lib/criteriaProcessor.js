@@ -873,23 +873,25 @@ CriteriaProcessor.prototype.skip = function(options) {
  * Specify a `sort` condition
  */
 
-CriteriaProcessor.prototype.sort = function(options) {
-  var keys = _.keys(options);
-  if (!keys.length) { return; }
+ CriteriaProcessor.prototype.sort = function(options) {
+   var keys = _.keys(options);
+   if (!keys.length) { return; }
 
-  var self = this;
-  this.queryString += ' ORDER BY ';
+   var self = this;
+   this.queryString += ' ORDER BY ';
 
-  _.each(keys, function(key) {
-    var hasTableName = key.split('.');
-    if(Array.isArray(hasTableName)){
-      var direction = options[key] === 1 ? 'ASC' : 'DESC';
-      self.queryString += utils.escapeName(hasTableName[0], self.escapeCharacter, hasTableName[1]) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
-    }else{
-      var direction = options[key] === 1 ? 'ASC' : 'DESC';
-      self.queryString += utils.escapeName(self.schemaName, self.escapeCharacter, self.tableName) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
-    }
-  });
+   _.each(keys, function(key) {
+     var sortValues = key.split('.');
+     var direction = options[key] === 1 ? 'ASC' : 'DESC';
+     if(Array.isArray(sortValues) && sortValues.length > 1){
+       self.queryString += utils.escapeName("__" + sortValues[0], self.escapeCharacter, self.schemaName) + '.' + utils.escapeName(sortValues[1], self.escapeCharacter) + ' ' + direction + ', ';
+     }else{
+       self.queryString += utils.escapeName(self.currentTable, self.escapeCharacter, self.schemaName) + '.' + utils.escapeName(key, self.escapeCharacter) + ' ' + direction + ', ';
+     }
+   });
+   // Remove trailing comma
+   this.queryString = this.queryString.slice(0, -2);
+ };
 
   // Remove trailing comma
   this.queryString = this.queryString.slice(0, -2);
